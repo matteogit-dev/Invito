@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ho una domanda per te... 🤔</title>
+    <meta property="og:title" content="Ho una domanda per te... 🤔">
+    <meta property="og:description" content="Aprila e rispondi.">
+    <meta property="og:type" content="website">
+    <!-- Libreria per l'effetto coriandoli -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #ff4d6d;
+            --bg: #fff0f3;
+            --text: #2b2d42;
+            --card-bg: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            padding: 15px;
+            position: relative;
+        }
+
+        /* Elementi fluttuanti sullo sfondo */
+        .bg-heart {
+            position: fixed;
+            bottom: -40px;
+            font-size: 24px;
+            opacity: 0;
+            animation: float 7s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+            50%  { opacity: 0.25; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 30px 20px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(255, 77, 109, 0.12);
+            text-align: center;
+            max-width: 380px;
+            width: 100%;
+            z-index: 10;
+            border: 2px solid rgba(255, 77, 109, 0.1);
+            position: relative;
+            overflow: hidden;
+            min-height: 440px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .img-container {
+            width: 100%;
+            height: 130px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 80px;
+        }
+
+        .img-container img {
+            max-height: 100%;
+            max-width: 100%;
+            border-radius: 15px;
+            object-fit: contain;
+        }
+
+        h1 { font-size: 22px; margin-bottom: 10px; line-height: 1.3; color: var(--text); }
+
+        p { font-size: 15px; color: #5c677d; margin-bottom: 20px; font-weight: 500; line-height: 1.4; }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            height: 190px;
+            width: 100%;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #yesBtn {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 6px 20px rgba(255, 77, 109, 0.3);
+            z-index: 7;
+        }
+
+        #noBtn {
+            background-color: #e2e8f0;
+            color: #64748b;
+            position: absolute;
+            transition: all 0.1s ease-out;
+            z-index: 6;
+        }
+
+        .btn:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
+
+        .success-text { color: var(--primary); font-weight: 800; }
+
+        .wobble { display: inline-block; animation: wobble 2.4s ease-in-out infinite; }
+        @keyframes wobble { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg) translateY(-6px); } }
+
+        @media (prefers-reduced-motion: reduce) {
+            .wobble { animation: none; }
+            .bg-heart { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Elementi decorativi -->
+    <div class="bg-heart" style="left: 10%; animation-delay: 0s;">🎲</div>
+    <div class="bg-heart" style="left: 80%; animation-delay: 2s;">🍻</div>
+    <div class="bg-heart" style="left: 50%; animation-delay: 4s;">✨</div>
+
+    <div class="card" id="mainCard">
+        <div>
+            <div class="img-container" id="imgBox">
+                <span class="wobble">🎲🍻</span>
+            </div>
+
+            <h1 id="title">Ti va una serata pub e giochi da tavolo? 🎲🍻</h1>
+            <p id="subtitle">Sabato 17. Orario e posto li decidiamo insieme 😉</p>
+        </div>
+
+        <div class="btn-container" id="btnContainer">
+            <button class="btn" id="yesBtn" onclick="celebrate()">Sì! 😍</button>
+            <button class="btn" id="noBtn">No 😢</button>
+        </div>
+    </div>
+
+    <script>
+        const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const card = document.getElementById('mainCard');
+        const btnContainer = document.getElementById('btnContainer');
+        const subtitle = document.getElementById('subtitle');
+        const imgBox = document.getElementById('imgBox');
+        let attempts = 0;
+        let px = -999, py = -999; // ultima posizione del puntatore
+        const GIF_ATTESA = "https://media.giphy.com/media/qUIm5wu6LAAog/giphy.gif"; // gif della schermata iniziale (vuoto = emoji)
+
+        /* Se una gif non si carica, al suo posto compare un emoji */
+        function setPic(src, fallback) {
+            imgBox.innerHTML = '';
+            const img = document.createElement('img');
+            img.id = 'cardGif';
+            img.alt = '';
+            img.onerror = () => { imgBox.textContent = fallback; };
+            img.src = src;
+            imgBox.appendChild(img);
+        }
+        if (GIF_ATTESA) setPic(GIF_ATTESA, '🎲🍻');
+
+        function overlaps(a, b) {
+            return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
+        }
+
+        const FRASI = [
+            "Ops, mossa non valida 😜",
+            "Riprova, magari prendi meglio la mira 🎯",
+            "Guarda che il tasto SÌ è molto più comodo 👀",
+            "Il 'No' non è un'opzione valida oggi 🛑",
+            "Dai, un turno solo e poi si decide 🎲",
+            "Ritira la pedina e premi Sì 😅",
+            "Hai perso un turno, tocca al Sì 😂",
+            "Arrenditi e clicca quel grande bottone rosa 😂",
+            "Posso andare avanti tutto il giorno 😄"
+        ];
+        let lastFrase = -1;
+
+        function escapeButton(e) {
+            if (e) e.preventDefault(); // Blocca il click reale: il No non si preme mai
+            attempts++;
+
+            // Una frase nuova a ogni tentativo; finite quelle iniziali, si ripescano a caso dalle ultime
+            let i = attempts <= FRASI.length ? attempts - 1 : 4 + Math.floor(Math.random() * (FRASI.length - 4));
+            if (i === lastFrase) i = 4 + ((i - 3) % (FRASI.length - 4));
+            lastFrase = i;
+            subtitle.innerText = FRASI[i];
+
+            // Il Sì cresce un po' a ogni tentativo, fino a 1,4 volte
+            yesBtn.style.transform = "scale(" + Math.min(1.4, 1 + attempts * 0.05) + ")";
+
+            placeNo();
+        }
+
+        // Sposta il No in un punto a caso dell'area dei pulsanti: lontano dal puntatore e mai sopra il Sì
+        function placeNo() {
+            const ct = btnContainer.getBoundingClientRect();
+            const b = noBtn.getBoundingClientRect();
+            const y0 = yesBtn.getBoundingClientRect();
+            const m = 14;
+            const zone = { left: y0.left - m, top: y0.top - m, right: y0.right + m, bottom: y0.bottom + m };
+            const maxX = Math.max(0, ct.width - b.width), maxY = Math.max(0, ct.height - b.height);
+            const cur = { x: (b.left + b.right) / 2, y: (b.top + b.bottom) / 2 };
+
+            // Punti validi: non sopra il Sì e abbastanza lontani sia dal puntatore sia da dove si trova ora
+            const pool = minDist => {
+                const out = [];
+                for (let i = 0; i < 60; i++) {
+                    const k = { x: Math.random() * maxX, y: Math.random() * maxY };
+                    const t = { left: ct.left + k.x, top: ct.top + k.y, right: ct.left + k.x + b.width, bottom: ct.top + k.y + b.height };
+                    if (overlaps(t, zone)) continue;
+                    const cx = (t.left + t.right) / 2, cy = (t.top + t.bottom) / 2;
+                    if (Math.hypot(cx - px, cy - py) >= minDist && Math.hypot(cx - cur.x, cy - cur.y) >= minDist * 0.8) out.push(k);
+                }
+                return out;
+            };
+            let choices = pool(110);
+            if (!choices.length) choices = pool(60);
+            if (!choices.length) choices = pool(0);
+            const best = choices.length ? choices[Math.floor(Math.random() * choices.length)] : { x: 0, y: 0 };
+            noBtn.style.left = best.x + 'px';
+            noBtn.style.top = best.y + 'px';
+        }
+
+        // Posizione iniziale: accanto al Sì, a metà altezza
+        function initNo() {
+            const ct = btnContainer.getBoundingClientRect();
+            const y0 = yesBtn.getBoundingClientRect();
+            noBtn.style.left = Math.min(ct.width - noBtn.offsetWidth, y0.right - ct.left + 12) + 'px';
+            noBtn.style.top = ((ct.height - noBtn.offsetHeight) / 2) + 'px';
+        }
+        initNo();
+        addEventListener('load', () => { if (!attempts) initNo(); });
+        addEventListener('resize', () => { if (!attempts) initNo(); });
+
+        // Telefono: appena il dito tocca il No, questo scappa (e il click vero viene bloccato)
+        noBtn.addEventListener('touchstart', e => {
+            px = e.touches[0].clientX; py = e.touches[0].clientY;
+            escapeButton(e);
+        }, { passive: false });
+        noBtn.addEventListener('click', escapeButton);
+
+        // Computer: scappa quando il cursore si avvicina (non solo quando ci passa sopra)
+        let lastMove = 0;
+        document.addEventListener('pointermove', e => {
+            if (e.pointerType === 'touch' || noBtn.style.display === 'none') return;
+            px = e.clientX; py = e.clientY;
+            const now = Date.now();
+            if (now - lastMove < 120) return;
+            const r = noBtn.getBoundingClientRect();
+            const dx = Math.max(r.left - px, 0, px - r.right);
+            const dy = Math.max(r.top - py, 0, py - r.bottom);
+            if (Math.hypot(dx, dy) < 50) { lastMove = now; escapeButton(); }
+        });
+
+        // Quando si preme "Sì"
+        function celebrate() {
+            document.getElementById('title').innerHTML = "Fantastico! <span class='success-text'>Allora è deciso!</span> 🎉";
+            subtitle.innerHTML = "Allora non ci resta che scegliere dove 😉";
+
+            noBtn.style.display = 'none';
+            yesBtn.style.transform = 'scale(1.1)';
+            yesBtn.innerText = "Evviva! 🥳";
+
+            // Orsetto felice che festeggia
+            setPic("https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3ZkNzQzaGRkMHN2OWo5OWx2MmhkaXczMWZxbzFoY2o4YXIxZnNlZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/artj92V8o75VPL7AeQ/giphy.gif", "🥳");
+
+            // Coriandoli
+            if (window.confetti) {
+                confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+            }
+        }
+    </script>
+</body>
+</html>
