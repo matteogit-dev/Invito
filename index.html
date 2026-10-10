@@ -84,6 +84,17 @@
             object-fit: contain;
         }
 
+        .when {
+            display: inline-block;
+            background: #ffe3e9;
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 14px;
+            padding: 6px 14px;
+            border-radius: 50px;
+            margin-bottom: 12px;
+        }
+
         h1 { font-size: 22px; margin-bottom: 10px; line-height: 1.3; color: var(--text); }
 
         p { font-size: 15px; color: #5c677d; margin-bottom: 20px; font-weight: 500; line-height: 1.4; }
@@ -153,8 +164,9 @@
                 <span class="wobble">🎲🍻</span>
             </div>
 
+            <div class="when">📅 Sabato 17</div>
             <h1 id="title">Ti va una serata pub e giochi da tavolo? 🎲🍻</h1>
-            <p id="subtitle">Sabato 17. Orario e posto li decidiamo insieme 😉</p>
+            <p id="subtitle">Orario e posto li decidiamo insieme 😉</p>
         </div>
 
         <div class="btn-container" id="btnContainer">
@@ -282,8 +294,8 @@
 
         // Quando si preme "Sì"
         function celebrate() {
-            document.getElementById('title').innerHTML = "Fantastico! <span class='success-text'>Allora è deciso!</span> 🎉";
-            subtitle.innerHTML = "Allora non ci resta che scegliere dove 😉";
+            document.getElementById('title').innerHTML = "Perfetto, Francesca! <span class='success-text'>Allora è deciso!</span> 🎉";
+            subtitle.innerHTML = "Ci vediamo sabato 17! Adesso non ci resta che decidere dove 😉";
 
             noBtn.style.display = 'none';
             yesBtn.style.transform = 'scale(1.1)';
